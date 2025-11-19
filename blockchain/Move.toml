@@ -1,0 +1,16 @@
+[package]
+name = "VerityVest"
+version = "1.0.0"
+authors = ["Messi <you@example.com>"]
+license = "MIT"
+
+[addresses]
+trm = "0xe57cc832da53b0676291024beae6b66174dada2234034855a9feaded1bccedab"
+
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework", rev = "main" }
+AptosStdlib   = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-stdlib", rev = "main" }
+MoveStdlib    = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/move-stdlib", rev = "main" }
+
+[dev-addresses]
+trm = "0xe57cc832da53b0676291024beae6b66174dada2234034855a9feaded1bccedab"
