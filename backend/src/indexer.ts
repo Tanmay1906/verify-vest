@@ -1,12 +1,17 @@
 import 'dotenv/config';
-import { Aptos, AptosConfig, Network } from 'aptos';
+import * as aptosLib from 'aptos';
 import { prisma } from './shared/prisma.js';
+
+// Some versions of the `aptos` package export different symbols; normalize to `any` to keep build stable
+const Aptos: any = (aptosLib as any).Aptos ?? (aptosLib as any).AptosClient ?? (aptosLib as any);
+const AptosConfig: any = (aptosLib as any).AptosConfig ?? Object;
+type Network = any;
 
 // Basic polling indexer: reads events from a module account and upserts minimal records.
 // NOTE: In real prod, persist last synced cursor in DB and handle reorgs.
 
 const MODULE_ADDRESS = process.env.MODULE_ADDRESS || process.env.VITE_MODULE_ADDRESS || '';
-const NETWORK = (process.env.APTOS_NETWORK as Network) || Network.DEVNET;
+const NETWORK = (process.env.APTOS_NETWORK as string) || ((aptosLib as any)?.Network?.DEVNET ?? 'DEVNET');
 const POLL_MS = Number(process.env.INDEXER_POLL_MS || 10000);
 
 if (!MODULE_ADDRESS) {

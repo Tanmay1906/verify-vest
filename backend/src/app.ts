@@ -28,7 +28,8 @@ app.use(
 );
 app.use(express.json({ limit: '512kb' }));
 app.use(express.urlencoded({ limit: '512kb', extended: true }));
-app.use(pinoHttp({ logger }));
+// pino-http's types may not expose a callable signature across versions; cast to any to avoid TS errors
+app.use((pinoHttp as any)({ logger }));
 
 const limiter = rateLimit({ windowMs: 60 * 1000, max: 300 });
 app.use(limiter);
