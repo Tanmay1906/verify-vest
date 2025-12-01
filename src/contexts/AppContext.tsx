@@ -1,10 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, Grant, Proposal } from '@/lib/types';
 import { connectWallet as connectAptosWallet, disconnectWallet as disconnectAptosWallet, getAccount } from '@/lib/wallet';
+import { api } from '@/lib/api';
 
 interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
+  token: string | null;
+  setToken: (t: string | null) => void;
   grants: Grant[];
   setGrants: (grants: Grant[]) => void;
   proposals: Proposal[];
@@ -33,16 +36,30 @@ interface AppProviderProps {
 
 export const AppProvider = ({ children }: AppProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [grants, setGrants] = useState<Grant[]>([]);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  React.useEffect(() => {
+  useEffect(() => {
     (async () => {
       const acct = await getAccount();
       if (acct?.address) {
         setIsWalletConnected(true);
         setWalletAddress(acct.address);
+      }
+
+      // load token from localStorage and fetch current user
+      const t = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (t) {
+        setToken(t);
+        try {
+          const me = await api.getMe();
+          setUser(me.user ?? me.user ?? me);
+        } catch (e) {
+          // ignore - token might be invalid
+          console.warn('Failed to fetch /api/auth/me', e);
+        }
       }
     })();
   }, []);
@@ -57,6 +74,9 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     await disconnectAptosWallet();
     setIsWalletConnected(false);
     setWalletAddress(null);
+    setUser(null);
+    setToken(null);
+    if (typeof window !== 'undefined') localStorage.removeItem('token');
   };
 
   return (
@@ -64,6 +84,8 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       value={{
         user,
         setUser,
+        token,
+        setToken,
         grants,
         setGrants,
         proposals,

@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, LogOut } from 'lucide-react';
 import { WalletConnect } from './WalletConnect';
 import { Button } from './ui/button';
@@ -6,11 +6,16 @@ import { useApp } from '@/contexts/AppContext';
 
 export const Header = () => {
   const location = useLocation();
-  const { user, setUser } = useApp();
+  const { user, disconnectWallet } = useApp();
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    setUser(null);
-    window.location.href = '/';
+  const handleLogout = async () => {
+    try {
+      await disconnectWallet();
+    } catch (e) {
+      // ignore errors
+    }
+    navigate('/');
   };
 
   return (

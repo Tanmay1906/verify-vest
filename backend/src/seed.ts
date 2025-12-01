@@ -7,6 +7,11 @@ async function main() {
     update: {},
     create: { name: 'Tech for Good Foundation', email: 'donor@example.com', role: 'donor' },
   });
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
+    update: {},
+    create: { name: 'Admin', email: 'admin@example.com', role: 'admin' },
+  });
   const applicant = await prisma.user.upsert({
     where: { email: 'applicant@example.com' },
     update: {},

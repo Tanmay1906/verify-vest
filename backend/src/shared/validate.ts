@@ -45,7 +45,7 @@ export const MilestoneVerifySchema = z.object({
 export const UserCreateSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
-  role: z.string().min(1),
+  role: z.enum(['donor', 'applicant', 'verifier', 'user', 'admin']).optional().default('user'),
   walletAddress: z.string().optional(),
   bio: z.string().optional(),
   avatar: z.string().optional(),

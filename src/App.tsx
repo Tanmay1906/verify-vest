@@ -10,6 +10,7 @@ import DonorDashboard from "./pages/DonorDashboard";
 import ApplicantDashboard from "./pages/ApplicantDashboard";
 import VerifierDashboard from "./pages/VerifierDashboard";
 import GrantDetail from "./pages/GrantDetail";
+import Grants from "./pages/Grants";
 import ProposalDetail from "./pages/ProposalDetail";
 import NotFound from "./pages/NotFound";
 
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/donor" element={<DonorDashboard />} />
             <Route path="/applicant" element={<ApplicantDashboard />} />
             <Route path="/verifier" element={<VerifierDashboard />} />
+            <Route path="/grants" element={<Grants />} />
             <Route path="/grant/:id" element={<GrantDetail />} />
             <Route path="/proposal/:id" element={<ProposalDetail />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

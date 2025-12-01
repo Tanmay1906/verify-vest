@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Shield, Zap, Globe, Target, Users, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,26 +7,51 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useApp } from '@/contexts/AppContext';
 import { UserRole } from '@/lib/types';
 
+import { toast } from 'sonner';
 const Index = () => {
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
-  const { user, setUser, isWalletConnected, connectWallet, disconnectWallet, walletAddress } = useApp();
+  const { user, setUser, isWalletConnected, connectWallet, disconnectWallet, walletAddress, setToken } = useApp();
+  const navigate = useNavigate();
 
-  const selectRole = (role: UserRole) => {
-    if (!isWalletConnected) {
-      setIsRoleDialogOpen(false);
+  const selectRole = async (role: UserRole) => {
+    if (!isWalletConnected || !walletAddress) {
+      toast.error('Connect your wallet first');
       return;
     }
-    // Mock user creation
-    const mockUser = {
-      id: `user-${Date.now()}`,
-      name: role === 'donor' ? 'John Donor' : role === 'applicant' ? 'Jane Applicant' : 'Bob Verifier',
-      email: `${role}@example.com`,
-      role,
-      bio: `Demo ${role} account`,
-    };
-    setUser(mockUser);
-    setIsRoleDialogOpen(false);
-    window.location.href = `/${role}`;
+
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+    try {
+      const payload = { address: walletAddress, role };
+      const lres = await fetch(`${API_BASE}/api/auth/wallet-login-simple`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!lres.ok) {
+        const txt = await lres.text();
+        let msg = txt;
+        try {
+          const parsed = JSON.parse(txt);
+          if (parsed?.message) msg = parsed.message;
+        } catch (e) {
+          // ignore parse error
+        }
+        throw new Error(msg);
+      }
+
+      const ljson = await lres.json();
+      if (ljson.token) {
+        localStorage.setItem('token', ljson.token);
+        setToken(ljson.token);
+      }
+      setUser(ljson.user);
+      setIsRoleDialogOpen(false);
+      navigate(`/${ljson.user.role}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error('Login failed', { description: msg });
+    }
   };
 
   if (user) {

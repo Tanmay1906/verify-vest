@@ -57,8 +57,12 @@ function mapProposal(api: any): Proposal {
 }
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     ...init,
   });
   if (!res.ok) {
@@ -72,6 +76,9 @@ export const api = {
   async getGrants(): Promise<Grant[]> {
     const data = await http<any[]>('/api/grants');
     return data.map(mapGrant);
+  },
+  async getMe(): Promise<any> {
+    return http<any>('/api/auth/me');
   },
   async getGrant(id: string): Promise<Grant> {
     const data = await http<any>(`/api/grants/${id}`);
